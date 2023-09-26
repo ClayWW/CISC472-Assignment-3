@@ -41,7 +41,6 @@ def bh_encrypt(plaintext, key, rounds): #will finish with all blocks being full
     encrypted_blocks = []
     subkeys = []
     blocks, padding_length = divide_blocks(plaintext, 128)
-    print(blocks)
     for block in enumerate(blocks):
         
         left,right = plaintext[:8],plaintext[8:]  #correctly splits
@@ -69,9 +68,9 @@ def bh_encrypt(plaintext, key, rounds): #will finish with all blocks being full
 
 def bh_decrypt(ciphertext, subkeys, rounds, padding_length):
     decrypted_blocks = []
-    blocks, should_be_zero = divide_blocks(ciphertext, 128)
-    if(should_be_zero != (0 or 128)):
-        print(should_be_zero)
+    blocks, should_be_size = divide_blocks(ciphertext, 128)
+    if(should_be_size != 128):
+        print(should_be_size)
         print("error with encryption padding")
     for block in enumerate(blocks):
         left,right = ciphertext[:8],ciphertext[8:]
@@ -93,8 +92,8 @@ def bh_decrypt(ciphertext, subkeys, rounds, padding_length):
 
 def bh_ctr_decryption(ciphertext, key, nonce, rounds, padding_length): 
     decrypted_blocks = []
-    blocks, should_be_zero = divide_blocks(ciphertext, 128)
-    if(should_be_zero != (0 or 128)):
+    blocks, should_be_size = divide_blocks(ciphertext, 128)
+    if(should_be_size != 128):
         print("error with encryption padding")
     for i,block in enumerate(blocks):
         input = str(nonce)+str(i)
