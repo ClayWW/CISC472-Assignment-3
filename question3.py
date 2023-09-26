@@ -17,7 +17,7 @@ def generate_round_keys(key, rounds): #works
 
 def divide_blocks(plaintext, block_size):
     blocks = []
-    num_blocks = len(plaintext)//block_size
+    num_blocks = len(plaintext)//block_size + 1
     for i in range(num_blocks):
         block_start = i*block_size
         block_end = block_start+block_size
@@ -26,9 +26,6 @@ def divide_blocks(plaintext, block_size):
     if len(plaintext) % block_size != 0:
         remaining_block = plaintext[num_blocks*block_size:]
         padding_length = block_size - len(remaining_block)%block_size
-        #padding = bytes([padding_length]*padding_length)
-        #padded_block = remaining_block + padding
-        #blocks.append(padded_block)
     else:
         padding_length = 0
     return blocks, padding_length
@@ -40,9 +37,11 @@ def remove_padding(block):
     unpadded_block = block[:-padding_length]
     return unpadded_block
 
-def bh_encrypt(plaintext, key, rounds):
+def bh_encrypt(plaintext, key, rounds): #will finish with all blocks being full
     encrypted_blocks = []
-    blocks, padding_length = divide_blocks(plaintext)
+    subkeys = []
+    blocks, padding_length = divide_blocks(plaintext, 128)
+    print(blocks)
     for block in enumerate(blocks):
         
         left,right = plaintext[:8],plaintext[8:]  #correctly splits
@@ -64,25 +63,28 @@ def bh_encrypt(plaintext, key, rounds):
         ciphertext = left_bytes+right_bytes
         encrypted_blocks.append(ciphertext)
 
-        if(block == len(blocks)-1):
-            block = block[:-padding_length]
-
-    concat_blocks = " ".join(encrypted_blocks)
-    return concat_blocks, subkeys
+    concat_blocks = b"".join(encrypted_blocks)
+    return concat_blocks, subkeys, padding_length
 
 
-def bh_decrypt(ciphertext, subkeys, rounds):
-    left,right = ciphertext[:8],ciphertext[8:]
-    for round in range(rounds-1, -1, -1): #working
-        #print(f"Round {round + 1} Key : {subkeys[round].hex()}")
-        prf_r = PRF(subkeys[round],right)
-        #print(f"Round {round + 1} PRF output: {prf_r.hex()}")
-        xored_left = xor(left, prf_r)
-        #print(f"Round {round + 1} XOR output: {xored_left.hex()}")
-        left = right
-        right = xored_left
-        #print((left+right).hex())
-    plaintext = left+right
+def bh_decrypt(ciphertext, subkeys, rounds, padding_length):
+    decrypted_blocks = []
+    blocks, padding_length = divide_blocks(ciphertext, 128)
+    for block in enumerate(blocks):
+        left,right = ciphertext[:8],ciphertext[8:]
+        for round in range(rounds-1, -1, -1): #working
+            #print(f"Round {round + 1} Key : {subkeys[round].hex()}")
+            prf_r = PRF(subkeys[round],right)
+            #print(f"Round {round + 1} PRF output: {prf_r.hex()}")
+            xored_left = xor(left, prf_r)
+            #print(f"Round {round + 1} XOR output: {xored_left.hex()}")
+            left = right
+            right = xored_left
+            #print((left+right).hex())
+        plaintext = left+right
+        if block == len(blocks)-1:
+            plaintext = plaintext[:-padding_length]
+        decrypted_blocks.append(plaintext)
     return plaintext.decode('iso-8859-1')
 
 
@@ -101,7 +103,7 @@ plaintext = "Hello, World CWW"
 key = bytes.fromhex("7bc6ac0dbe97d6e41cb440abd82b8dcf")
 rounds = 5
 
-ciphertext, subkeys = bh_encrypt(plaintext, key, rounds)
+ciphertext, subkeys, padding_length = bh_encrypt(plaintext, key, rounds)
 print(ciphertext.hex())
-decrypted_plaintext = bh_decrypt(ciphertext, subkeys, rounds)
+decrypted_plaintext = bh_decrypt(ciphertext, subkeys, rounds, padding_length)
 print(decrypted_plaintext)
