@@ -20,4 +20,4 @@ def PRF(key, msg):
     seed = rnd
   return rnd
 
-print(PRF(b'\x00'*5,b'\x00'*5))
+#print(PRF(b'\x00'*5,b'\x00'*5))
