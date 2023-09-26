@@ -37,7 +37,7 @@ def remove_padding(block):
     unpadded_block = block[:-padding_length]
     return unpadded_block
 
-def bh_encrypt(plaintext, key, rounds): #will finish with all blocks being full
+def bh_encrypt(plaintext: str, key: bytes, rounds: int): #will finish with all blocks being full
     encrypted_blocks = []
     subkeys = []
     blocks, padding_length = divide_blocks(plaintext, 128)
@@ -92,11 +92,13 @@ def bh_decrypt(ciphertext, subkeys, rounds, padding_length):
 
 def bh_ctr_decryption(ciphertext, key, nonce, rounds, padding_length): 
     decrypted_blocks = []
-    blocks, should_be_size = divide_blocks(ciphertext, 128)
-    if(should_be_size != 128):
+    blocks, should_be_size = divide_blocks(ciphertext, 128) #divide the ciphertext into blocks
+    if(should_be_size != 128): #make sure correct padding
         print("error with encryption padding")
-    for i,block in enumerate(blocks):
-        input = str(nonce)+str(i)
+    for i,block in enumerate(blocks): 
+        if(i > 256):
+            print("Out of counter, Need a new nonce!")
+        input = nonce+i.to_bytes(8,'big')
         encrypted = bh_encrypt(input, key, rounds)
         message = xor(block, encrypted)
         if(block == len(blocks)-1):
@@ -113,4 +115,14 @@ ciphertext, subkeys, padding_length = bh_encrypt(plaintext, key, rounds)
 print(ciphertext.hex())
 decrypted_plaintext = bh_decrypt(ciphertext, subkeys, rounds, padding_length)
 print(decrypted_plaintext)
-#concat_plain = bh_ctr_decryption()
+
+#testing bh_ctr_decryption
+message = "0123456789ABCDEF"
+counter = bytes.fromhex("00") #since the message is only one block
+nonce = bytes.fromhex("59733285e8d82615")
+encryption_input = nonce+counter
+encrypted_text = bh_encrypt(encryption_input, key, 5)
+ciphertext_ctr = xor(encrypted_text,message)
+
+concat_plain = bh_ctr_decryption(ciphertext, key, nonce, rounds, padding_length)
+print(concat_plain)
