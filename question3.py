@@ -69,7 +69,10 @@ def bh_encrypt(plaintext, key, rounds): #will finish with all blocks being full
 
 def bh_decrypt(ciphertext, subkeys, rounds, padding_length):
     decrypted_blocks = []
-    blocks, padding_length = divide_blocks(ciphertext, 128)
+    blocks, should_be_zero = divide_blocks(ciphertext, 128)
+    if(should_be_zero != (0 or 128)):
+        print(should_be_zero)
+        print("error with encryption padding")
     for block in enumerate(blocks):
         left,right = ciphertext[:8],ciphertext[8:]
         for round in range(rounds-1, -1, -1): #working
@@ -88,13 +91,17 @@ def bh_decrypt(ciphertext, subkeys, rounds, padding_length):
     return plaintext.decode('iso-8859-1')
 
 
-
-def bh_ctr_decryption(ciphertext_blocks, key, nonce, rounds):
+def bh_ctr_decryption(ciphertext, key, nonce, rounds, padding_length): 
     decrypted_blocks = []
-    for i,block in enumerate(ciphertext_blocks):
+    blocks, should_be_zero = divide_blocks(ciphertext, 128)
+    if(should_be_zero != (0 or 128)):
+        print("error with encryption padding")
+    for i,block in enumerate(blocks):
         input = str(nonce)+str(i)
         encrypted = bh_encrypt(input, key, rounds)
         message = xor(block, encrypted)
+        if(block == len(blocks)-1):
+            message = message[:-padding_length]
         decrypted_blocks.append(message)
     concat_plain = " ".join(decrypted_blocks)
     return concat_plain
@@ -107,3 +114,4 @@ ciphertext, subkeys, padding_length = bh_encrypt(plaintext, key, rounds)
 print(ciphertext.hex())
 decrypted_plaintext = bh_decrypt(ciphertext, subkeys, rounds, padding_length)
 print(decrypted_plaintext)
+#concat_plain = bh_ctr_decryption()
