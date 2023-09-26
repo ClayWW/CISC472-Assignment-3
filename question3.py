@@ -1,6 +1,5 @@
 from main import PRF
 from drbg import *
-import secrets
 
 def xor(X, Y):
     return bytes(a ^ b for a,b in zip(X,Y))
@@ -86,8 +85,6 @@ def bh_decrypt(ciphertext, subkeys, rounds):
     plaintext = left+right
     return plaintext.decode('iso-8859-1')
 
-def bh_ctr_encryption():
-    return
 
 
 def bh_ctr_decryption(ciphertext_blocks, key, nonce, rounds):
