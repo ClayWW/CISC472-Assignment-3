@@ -2,4 +2,17 @@ In order to recover our passphrase, we will need to perform a padding oracle att
 oracle. Because we are in AES-128, each block is 16 bytes meaning that we only have one block to target.
 To start, we are going to alter our ciphertext's final byte and pass it into Olivia. If she returns True, we know that
 decrypting the altered ciphertext ended with 01 which is valid padding. If she returns False, we know that our altered
-ciphertext did not end with 01 and therefore did not have valid padding. 
+ciphertext did not end with 01 and therefore did not have valid padding. We will try all 256 possibilites for that
+final byte until we have an permutation that results in a True from Olivia, indicating correct padding. Once we have
+the altered byte that results in correct 01 padding, we will xor our altered byte with the original ciphertext
+byte and then xor that with 01 so that we will be left with the final byte of the original plaintext. Now that we
+have our final plaintext byte discovered, we can move on to the second byte. To discover the second byte of the plaintext,
+we must first alter the first ciphertext byte so that we are left with 02. To do this, we xor the final bytes ciphertext
+with the plaintext that we now know and then xor that with 02 so that we are left with our final byte being 02. We then once
+again alter the original ciphertext, this time making the final byte the value that will lead to 02 and going through all
+256 permutations until Olivia lets us know that we have valid padding once more. We then xor the altered second to last byte with
+the original second to last ciphertext byte and then finally xor that with 02 to be left with the second to last byte in
+the original plaintxt. We repeat this process once again, xor our bytes so that the first and second bytes are both 03 and then
+once again run through all 256 permutations for the third to last byte until we have valid padding once more and can then discover
+the third to last plaintext byte. We repeat this process for all 16 bytes in the ciphertext until we have deduced all
+16 bytes of the plaintext at which point we will be left with our newly decrypted passphrase.
