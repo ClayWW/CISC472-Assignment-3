@@ -129,8 +129,6 @@ def bh_ctr_encryption(message_bytes, key, nonce, rounds):
 def bh_ctr_decryption(ciphertext, key, nonce, rounds, padding_length): 
     decrypted_blocks = []
     blocks, _ = divide_blocks(ciphertext, 128) #correctly divides
-    print("Block 1: ", blocks[0])
-    print("Block 2: ", blocks[1])
     for i,block in enumerate(blocks): 
         if(i > 256):
             print("Out of counter, Need a new nonce!")
@@ -144,14 +142,14 @@ def bh_ctr_decryption(ciphertext, key, nonce, rounds, padding_length):
     concat_plain = b"".join(decrypted_blocks) #empty when it shouldn't be
     return concat_plain.decode('iso-8859-1')
 
+#testing feistel
 plaintext = "Hello, World CWW"
 key = bytes.fromhex("7bc6ac0dbe97d6e41cb440abd82b8dcf")
 rounds = 5
-
 ciphertext, subkeys, padding_length = bh_encrypt(plaintext, key, rounds)
-#print(ciphertext.hex())
+print(ciphertext.hex())
 decrypted_plaintext = bh_decrypt(ciphertext, subkeys, rounds, padding_length)
-#print(decrypted_plaintext)
+print(decrypted_plaintext)
 
 #testing bh_ctr_decryption
 message = "0123456789ABCDEF0123456789ABCDEF"
@@ -160,8 +158,8 @@ nonce = bytes.fromhex("59733285e8d82615")
 ciphertext_ctr = bh_ctr_encryption(message_bytes, key, nonce, rounds)
 
 concat_plain = bh_ctr_decryption(ciphertext_ctr, key, nonce, rounds, padding_length)
-print(message)
-print(concat_plain)
+#print(message)
+#print(concat_plain)
 
 #blocks, _ = divide_blocks(message, 128)
 #print("Output: ",blocks)
