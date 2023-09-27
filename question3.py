@@ -44,10 +44,9 @@ def divide_blocks(plaintext, block_size_bits: int):
 
 def remove_padding(block):
     padding_length = block[-1]
-    if padding_length <= 0 or padding_length > len(block):
-        return block
-    unpadded_block = block[:-padding_length]
-    return unpadded_block
+    if padding_length == len(block):
+        return b""
+    return block[:-padding_length]
 
 def bh_encrypt(plaintext: str, key: bytes, rounds: int): #will finish with all blocks being full
     encrypted_blocks = []
@@ -90,7 +89,7 @@ def bh_decrypt(ciphertext, subkeys, rounds, padding_length):
             plaintext = plaintext[:-padding_length]
         decrypted_blocks.append(plaintext)
     concat_blocks = b"".join(decrypted_blocks)
-    return concat_blocks.decode('iso-8859-1')
+    return concat_blocks
 
 def bh_ctr_encryption(message_bytes, key, nonce, rounds):
     encrypted_blocks = []
@@ -125,28 +124,36 @@ def bh_ctr_decryption(ciphertext, key, nonce, rounds, padding_length):
 
 def bh_cbc_encryption(plaintext, key, IV, rounds):
     encrypted_blocks = []
-    blocks,_,_ = divide_blocks(plaintext,128)
+    blocks,_ = divide_blocks(plaintext,128)
     prev_cipher_block = IV
     for block in blocks:
         xor_block = xor(block, prev_cipher_block)
+        print("XORed Block (Encryption):", xor_block.hex())
         encrypted_block,_,_ = bh_encrypt(xor_block, key, rounds)
         encrypted_blocks.append(encrypted_block)
         prev_cipher_block = encrypted_block
+        print("Encrypted Block:", encrypted_block.hex()) 
     concat_ciphertext = b"".join(encrypted_blocks)
     return concat_ciphertext
 
+'''
 def bh_cbc_decryption(ciphertext, key, IV, rounds):
     decrypted_blocks = []
-    blocks,_,_ = divide_blocks(ciphertext, 128)
+    blocks, padding_length = divide_blocks(ciphertext, 128)
+    subkeys = generate_round_keys(key, rounds)
     prev_cipher_block = IV
     for block in blocks:
-        decrypted_block = bh_decrypt(block, key, rounds)
+        decrypted_block = bh_decrypt(block, subkeys, rounds, padding_length)
+        print("Decrypted Block (Before XOR):", decrypted_block.hex())
         xor_block = xor(decrypted_block, prev_cipher_block)
-        decrypted_blocks.append(decrypted_block)
+        decrypted_blocks.append(xor_block)
         prev_cipher_block = block
+        print("XORed Block (Decryption):", xor_block.hex())
+    decrypted_blocks[-1] = remove_padding(decrypted_blocks[-1])
     concat_plaintext = b"".join(decrypted_blocks)
-    return concat_plaintext
-
+    return remove_padding(concat_plaintext)
+'''
+    
 #testing feistel
 plaintext = "Hello, World CWW"
 key = bytes.fromhex("7bc6ac0dbe97d6e41cb440abd82b8dcf")
@@ -154,7 +161,7 @@ rounds = 5
 ciphertext, subkeys, padding_length = bh_encrypt(plaintext, key, rounds)
 print(ciphertext.hex())
 decrypted_plaintext = bh_decrypt(ciphertext, subkeys, rounds, padding_length)
-print(decrypted_plaintext)
+print(decrypted_plaintext.decode('iso-8859-1'))
 
 #testing bh_ctr_decryption
 message = "0123456789ABCDEF0123456789ABCDEF"
@@ -179,5 +186,7 @@ cipher = bh_cbc_encryption(plaintext, key, IV, rounds)
 print("Encrypted: ", cipher.hex())
 
 #testing cbc decryption
-decrypted = bh_cbc_decryption(cipher, key, IV, rounds)
-print("Decrypted: ", decrypted.decode('iso-8859-1'))
+#decrypted = bh_cbc_decryption(cipher, key, IV, rounds)
+#print("Decrypted: ", decrypted.decode('iso-8859-1'))
+
+
