@@ -1,0 +1,14 @@
+[[package]]
+category = "main"
+description = "Cryptographic modules for Python."
+name = "pycrypto"
+optional = false
+python-versions = "*"
+version = "2.6.1"
+
+[metadata]
+content-hash = "fe09c98d97e24ce55aee0b22b6bcf56dca3e88f63b8931490f8968991c3d1d2c"
+python-versions = "^3.7"
+
+[metadata.hashes]
+pycrypto = ["f2ce1e989b272cfcb677616763e0a2e7ec659effa67a88aa92b3a65528f60a3c"]
