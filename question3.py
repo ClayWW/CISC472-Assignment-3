@@ -132,17 +132,17 @@ def bh_ctr_decryption(ciphertext, key, nonce, rounds, padding_length):
     concat_plain = b"".join(decrypted_blocks)
     return concat_plain.decode('iso-8859-1')
 
-
+#CBC encryption, takes in the plaintext to be encrypted, the key used, the IV, and the amount of rounds used in bh_encrypt
 def bh_cbc_encryption(plaintext, key, IV, rounds):
     encrypted_blocks = []
-    blocks,_ = divide_blocks(plaintext,128)
-    prev_cipher_block = IV
-    for block in blocks:
-        xor_block = xor(block, prev_cipher_block)
-        encrypted_block,_,_ = bh_encrypt(xor_block, key, rounds)
-        encrypted_blocks.append(encrypted_block)
-        prev_cipher_block = encrypted_block
-    concat_ciphertext = b"".join(encrypted_blocks)
+    blocks,_ = divide_blocks(plaintext,128) #divide the plaintext into blocks
+    prev_cipher_block = IV #establish the IV as the first previous block to start out
+    for block in blocks: #for every block
+        xor_block = xor(block, prev_cipher_block) #xor the block with the previously encrypted block
+        encrypted_block,_,_ = bh_encrypt(xor_block, key, rounds) #pass the new xored block into the encryption algorithm
+        encrypted_blocks.append(encrypted_block) #append this new ciphertext to the array of encrypted blocks
+        prev_cipher_block = encrypted_block #the newly encrypted block is now the previous block for the next iteration
+    concat_ciphertext = b"".join(encrypted_blocks) #concatenate all of the encrypted blocks together and return
     return concat_ciphertext
 
     
