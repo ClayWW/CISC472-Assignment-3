@@ -80,6 +80,9 @@ def bh_encrypt(plaintext: str, key: bytes, rounds: int):
     return concat_blocks, subkeys, padding_length #return ciphertext, the subkeys used in all the rounds, and any padding the final block of ciphertext may have
 
 #decrypts ciphertext through a feistel network by passing the ciphertext through for the same amount of rounds as encryption but subkeys are applied in reverse order
+#I believe my problem lies here, I think the encryption algorithm is performing as intended, but there has to be something wrong with decryption
+#If I had to guess, the problem is something obvious that I am overlooking, I believe I am following the algorithm correctly in terms of the splitting, the PRF, the swapping, and
+#the recombination, so the problem likely lies with in either the padding or maybe the application of subkeys (but I think I have that right?)
 def bh_decrypt(ciphertext, subkeys, rounds, padding_length):
     decrypted_blocks = []
     blocks, padding_length = divide_blocks(ciphertext, 128) #divide ciphertext into blocks
