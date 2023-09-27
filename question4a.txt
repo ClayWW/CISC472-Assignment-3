@@ -1,0 +1,5 @@
+In order to recover our passphrase, we will need to perform a padding oracle attack utilizing Olivia as our
+oracle. Because we are in AES-128, each block is 16 bytes meaning that we only have one block to target.
+To start, we are going to alter our ciphertext's final byte and pass it into Olivia. If she returns True, we know that
+decrypting the altered ciphertext ended with 01 which is valid padding. If she returns False, we know that our altered
+ciphertext did not end with 01 and therefore did not have valid padding. 
